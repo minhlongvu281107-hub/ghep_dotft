@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ghép Đồ TFT - Mùa 18: Enchanted Wilds</title>
+  <meta name="description" content="Trang web học cách ghép trang bị game Đấu Trường Chân Lý (TFT) Mùa 18: Enchanted Wilds theo phong cách nối chữ bài tập tiểu học." />
+  
+  <!-- Phông chữ tiếng Việt tròn trịa, vui tươi -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="public/css/style.css" />
+</head>
+<body>
+
+  <!-- Header & Thanh điều khiển -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <div class="logo-badge">🍳</div>
+        <div>
+          <h1 class="site-title">Ghép Đồ TFT</h1>
+          <div class="site-subtitle">Mùa 18: Enchanted Wilds</div>
+        </div>
+      </div>
+
+      <div class="hud-group">
+        <div class="hud-pill" title="Điểm số tích lũy">
+          <span>⭐</span> <span id="hud-score">0</span>
+        </div>
+        <div class="hud-pill" title="Chuỗi ghép đúng liên tiếp">
+          <span>🔥</span> <span id="hud-streak">0</span>
+        </div>
+        <button id="sound-toggle-btn" class="hud-btn" title="Bật/Tắt âm thanh">
+          🔊 Âm thanh: Bật
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Thanh tab nhãn vở (4 Chế độ học & chơi) -->
+  <nav class="nav-tabs-wrapper">
+    <div class="nav-tabs-container">
+      <button class="nav-tab-btn active" data-tab="match">
+        <span>🎮</span> Nối Ảnh (Chính)
+      </button>
+      <button class="nav-tab-btn" data-tab="learn">
+        <span>📖</span> Bảng Công Thức
+      </button>
+      <button class="nav-tab-btn" data-tab="reverse">
+        <span>🔄</span> Nối Ngược
+      </button>
+      <button class="nav-tab-btn" data-tab="review">
+        <span>📝</span> Ôn Tập Câu Sai
+      </button>
+    </div>
+  </nav>
+
+  <!-- Khu vực nội dung các chế độ -->
+  <main class="main-content">
+
+    <!-- CHẾ ĐỘ 1: NỐI ẢNH (3 CỘT NGUYÊN LIỆU & ĐỒ HOÀN CHỈNH) -->
+    <section id="match-mode-view" class="mode-view active">
+      <div class="match-game-container">
+        <!-- SVG Layer để vẽ các đường nối bezier -->
+        <svg id="match-svg-layer" class="svg-cables-overlay"></svg>
+
+        <div class="match-header-banner">
+          <div id="match-stage-title" class="stage-badge">Màn 1 • Ghép 4 trang bị</div>
+          <div class="match-instruction-tip">
+            👉 <strong>Cách chơi:</strong> Chạm/kéo từ <em>Nguyên liệu 1</em> ➡️ <em>Nguyên liệu 2</em> ➡️ <em>Đồ hoàn chỉnh</em> tương ứng!
+          </div>
+        </div>
+
+        <div class="match-board-columns">
+          <!-- Cột 1: Nguyên liệu A -->
+          <div class="board-col col-1">
+            <div class="col-header">Mảnh ghép 1 🧩</div>
+            <div id="match-col-1" class="col-items-list"></div>
+          </div>
+
+          <!-- Cột 2: Nguyên liệu B -->
+          <div class="board-col col-2">
+            <div class="col-header">Mảnh ghép 2 ➕</div>
+            <div id="match-col-2" class="col-items-list"></div>
+          </div>
+
+          <!-- Cột 3: Đồ hoàn chỉnh -->
+          <div class="board-col col-3">
+            <div class="col-header">Đồ hoàn chỉnh 🏆</div>
+            <div id="match-col-3" class="col-items-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHẾ ĐỘ 2: HỌC & BẢNG CÔNG THỨC TRA CỨU -->
+    <section id="learn-mode-view" class="mode-view">
+      <div class="learn-controls">
+        <!-- Ô tìm kiếm -->
+        <div class="search-box">
+          <input type="text" id="learn-search-input" class="notebook-input" placeholder="🔍 Tìm kiếm theo tên đồ (Vô Cực, Giáp Gai, Trượng Hư Vô, Shojin...)" />
+        </div>
+
+        <!-- Thanh chọn nhanh nguyên liệu -->
+        <div>
+          <div style="font-weight: 700; font-size: 0.88rem; margin-bottom: 6px; color: #636e72;">
+            Lọc theo nguyên liệu gốc:
+          </div>
+          <div id="learn-comp-bar" class="comp-bar"></div>
+        </div>
+
+        <!-- Chip lọc phân loại -->
+        <div id="learn-category-filters" class="category-chips">
+          <button class="cat-chip active" data-category="all">Tất cả (36 đồ)</button>
+          <button class="cat-chip" data-category="damage_ad">Sát thương Vật Lý (AD)</button>
+          <button class="cat-chip" data-category="damage_ap">Sát thương Phép (AP)</button>
+          <button class="cat-chip" data-category="tank">Chống Chịu (Tank)</button>
+          <button class="cat-chip" data-category="utility">Đa Dụng / Hỗ Trợ</button>
+        </div>
+
+        <div id="learn-results-count" style="font-size: 0.85rem; font-weight: 700; color: #2d3436;"></div>
+      </div>
+
+      <!-- Lưới danh sách đồ -->
+      <div id="learn-items-grid" class="items-grid"></div>
+    </section>
+
+    <!-- CHẾ ĐỘ 3: NỐI NGƯỢC -->
+    <section id="reverse-mode-view" class="mode-view">
+      <div class="reverse-game-container">
+        <!-- Thẻ đồ hoàn chỉnh mục tiêu -->
+        <div id="reverse-target-card" class="target-card notebook-card"></div>
+
+        <!-- 2 Ô chọn nguyên liệu -->
+        <div class="reverse-slots-row">
+          <div id="reverse-slot-a" class="reverse-slot">
+            <span class="slot-placeholder">Mảnh 1</span>
+          </div>
+          <span class="slot-plus">+</span>
+          <div id="reverse-slot-b" class="reverse-slot">
+            <span class="slot-placeholder">Mảnh 2</span>
+          </div>
+        </div>
+
+        <div style="text-align: center;">
+          <button id="reverse-reset-pick" class="notebook-btn small-btn" style="background:#dfe6e9;">
+            🔄 Chọn lại 2 mảnh
+          </button>
+        </div>
+
+        <!-- Khay 10 nguyên liệu để chọn -->
+        <div id="reverse-components-tray" class="components-tray"></div>
+
+        <!-- Khung phản hồi kết quả -->
+        <div id="reverse-feedback" class="reverse-feedback"></div>
+
+        <div style="text-align: center;">
+          <button id="reverse-next-btn" class="notebook-btn primary-btn large-btn" style="display: none;">
+            Câu Tiếp Theo ➡️
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHẾ ĐỘ 4: ÔN TẬP (SPACED REPETITION) -->
+    <section id="review-mode-view" class="mode-view">
+      <div class="review-stats-summary" id="review-stats-summary"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+        <h3 style="font-family: var(--font-fun); font-size: 1.3rem;">
+          🎯 Danh sách trang bị ưu tiên ôn luyện
+        </h3>
+        <div style="display: flex; gap: 8px;">
+          <button id="review-start-quiz-btn" class="notebook-btn primary-btn small-btn">
+            🚀 Luyện tập ngay
+          </button>
+          <button id="review-clear-stats-btn" class="notebook-btn small-btn" style="background:#dfe6e9;">
+            🗑️ Đặt lại lịch sử sai
+          </button>
+        </div>
+      </div>
+
+      <div id="review-items-list" class="review-items-list"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL FLASHCARD CHI TIẾT TRANG BỊ -->
+  <div id="flashcard-modal" class="modal-overlay">
+    <div class="modal-container">
+      <button id="modal-close-btn" class="modal-close-icon" title="Đóng">✕</button>
+      <div id="modal-card-body"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER TUÂN THỦ BẢN QUYỀN & THÔNG TIN PATCH -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <p>
+        Dữ liệu và hình ảnh thuộc <strong>Riot Games</strong>. Trang này là sản phẩm của fan, không liên kết với Riot Games.
+      </p>
+      <p class="footer-patch">
+        Phiên bản TFT: <strong>Mùa 18 – Enchanted Wilds (Khu Rừng Kỳ Bí) | Patch 18.7</strong>
+      </p>
+      <p class="footer-note">
+        * Gợi ý trang bị mang tính tham khảo, meta thay đổi theo từng patch cập nhật.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="data/items-data.js"></script>
+  <script src="public/js/sound.js"></script>
+  <script src="public/js/data.js"></script>
+  <script src="public/js/modes/match.js"></script>
+  <script src="public/js/modes/learn.js"></script>
+  <script src="public/js/modes/reverse.js"></script>
+  <script src="public/js/modes/review.js"></script>
+  <script src="public/js/app.js"></script>
+</body>
+</html>
+
